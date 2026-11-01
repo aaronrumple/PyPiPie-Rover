@@ -1,0 +1,12 @@
+title:
+  en_us: "Rover"
+tooltip:
+  en_us: >-
+    Rover: browse and edit the whole document, the active sheet or view,
+    schedules and every family type. Edit instance and type parameters
+    for one element or a whole selection, search by category, family,
+    type or parameter value, and snoop settings and the database.
+author: Aaron Rumple
+help_url: "https://github.com/aaronrumple/PyPiPie-Rover"
+engine:
+  persistent: true

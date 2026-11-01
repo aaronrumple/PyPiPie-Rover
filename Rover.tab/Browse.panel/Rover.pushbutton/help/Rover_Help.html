@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rover Help</title>
+<style>
+:root {
+  --bg: #f4f5f7; --panel: #ffffff; --raised: #eef0f3; --border: #d3d8de; --text: #1c2025;
+  --muted: #4e5763; --accent: #0b63c4; --code: #eef1f5; --warn: #8a5300; --i: #145c36; --ibg: #d3f0df; --t: #6b4a00; --tbg: #fbebc6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #22262b; --panel: #2a2e34; --raised: #33383f; --border: #434a53; --text: #e5e8eb;
+    --muted: #a9b2bc; --accent: #6cb2ff; --code: #1e2125; --warn: #f2b35a; --i: #8be0b0; --ibg: #1e4632; --t: #f5c96a; --tbg: #4d3c16;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 "Segoe UI", system-ui, sans-serif; }
+a { color: var(--accent); }
+header { background: var(--panel); border-bottom: 1px solid var(--border); }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+.head { display: flex; align-items: center; gap: 16px; padding: 22px 0; }
+.head img { width: 56px; height: 56px; border-radius: 8px; }
+.head h1 { margin: 0; font-size: 28px; line-height: 1.2; }
+.head p { margin: 2px 0 0; color: var(--muted); }
+.quote { font-style: italic; color: var(--muted); margin-left: auto; text-align: right; }
+.layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 32px; padding: 28px 0 60px; }
+nav { position: sticky; top: 16px; align-self: start; font-size: 14px; }
+nav ol { list-style: none; margin: 0; padding: 0; }
+nav li a { display: block; padding: 4px 10px; border-left: 2px solid var(--border); color: var(--muted); text-decoration: none; }
+nav li a:hover { color: var(--text); border-left-color: var(--accent); }
+main section { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 6px 26px 18px; margin-bottom: 20px; }
+h2 { font-size: 21px; margin: 18px 0 8px; }
+h3 { font-size: 16px; margin: 18px 0 4px; }
+p, li { max-width: 72ch; }
+code, kbd { font-family: Consolas, "Cascadia Mono", monospace; font-size: 13px; background: var(--code); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+kbd { border-bottom-width: 2px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--raised); font-weight: 600; }
+.note { border-left: 3px solid var(--warn); background: var(--raised); padding: 8px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; }
+.badge { display: inline-block; font-weight: 700; font-size: 12px; padding: 0 6px; border-radius: 3px; }
+.bi { background: var(--ibg); color: var(--i); }
+.bt { background: var(--tbg); color: var(--t); }
+.panes { display: grid; grid-template-columns: 1fr 1.6fr 1.4fr; gap: 6px; margin: 12px 0; font-size: 13px; }
+.panes div { background: var(--raised); border: 1px solid var(--border); border-radius: 6px; padding: 10px; min-height: 70px; }
+.panes b { display: block; }
+footer { color: var(--muted); font-size: 13px; padding-bottom: 40px; }
+@media (max-width: 760px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { position: static; }
+  .quote { display: none; }
+  .panes { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmEzZWJjYTYxLTVmNTItNDA2Ni1iYjI5LTg0NzFiMjY0ZGE5MgAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoAQ/okC/+FOxAR9DarDVoGAAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6YmUzODU5MzEtNzZhMy00OGQ4LThjMGEtN2NjYmE4ZWJhNTEzbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaGIR6ep10JbXWPQ1TbInDxoAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYID0GKWqk+lVghAQsy2/SCul3TOuDjS4bRwZRZp1JLjsjpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2jqdKPf4n7Fkr95nAoVJmWZAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggnGMktZcDu4GsIBbMrWRoabM37A+VSimXRYLZ19bfGvpkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTphM2ViY2E2MS01ZjUyLTQwNjYtYmIyOS04NDcxYjI2NGRhOTIvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDo5MzI1YWNkNy1kNTA2LTRkMjYtOTFkZS1mODJlZGRmZTM3N2VyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggPQYpaqT6VWCEBCzLb9IK6XdM64ONLhtHBlFmnUkuOyOiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYINkiKbiXGsK8eKC+5Ay4yS0YuIdLRDeK53UJMIBsZnO0omN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIOA4hiu4tef4gcWYfzs6hkzi+oVWqJw07esKxpV8TArSdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2WEB1+aK3BwzKq8UFopFkMsXCaMLq4lmLrXMsZU1sfaGcgXFVwocHiM2L9jk8WnDqU9ovjJEVPWK9S3ir4DTg7cmCRGJ06wAAISRJREFUeF5Ne1usbWd53fgvc6619t7nbh/OsY19fGx8CyauAwmIm4GQkLaUxiQ0IF5o1bSVKir1IQ95qOWHShHqS1/7EqkViURUXiitKlUKLZFKmoqWiNqGYmPD8f2cs29rrzXn/G/VGN/cpsfa3uesy1zz/y7jG9/4vuXAP880j2dd5V/f/6Wv/7pH9zQqPuFDuOaAZasVDQ3OedRW4F2A038erXkAHggJrgWgeDQHuODQatNzzjs4V+GbAx9y3t5TXUVwEXwVUOF8QGsVfKA5B9f4qYADwHsoAIKPeu07T7gG1xwKKhqv2xoiHO9W76y5DD7i5eq7P2+tfPN7f/zp//L/n9nhmWc8nn22/upv/7t72nLxtYDuC6HrQi0TPxZwVYd0/FDnUAtvlAfg8b2MwnuGjzogeCvN6TU0k3cNNdph+I5SG3wLCMHRVrykrsWD8+28lKs0BOy9uluzQtXBHTxvS3dUdA80Eg0G71FrQ6TheFPO8yE9X/slkKaCUr+R0vQH/+Prf/MGHa+P/8hX/sP1kqZvhW7nsTIMDT5XOLqWzxd5H7LrfCe8u+DhKz3bEPhSRgU/zVU41+m1Y0rIk0cpRVdxoUOr5hkfaAiHFmgWoO8CQucReGhFjhmNh640EM+nwza9vuqQDcGZt/mW4ICmKKJFaJym9xXvmiu1Nud9vzjr8rR+rtX42b/444++5D7+u9/Y23b4Vr8481SZjlNDi851TsGrE9OSFbUEeM9IoNccfOSV7RAOEaELyC1j2ALjWOFdxoW9Je68o8M9FyMu7Qbs9A4xeJTWkErBZphw+wh46zjrZ73tkVtAHyP6qLjQ8eUAep7RhobMu2gVUfERFEatzKni+S6AdjZDFd0v329mQvbL3W4cNt/plu6zcejaF/t+56k8bbL36OgPR0fOIaggqwGxC6iV/wpmmBbgo0d0DWMCDvdHIBQ8eOcSj167gEev7+Dhuzqc3Y3oA73vkKeGUkfdTMoNKWXkVLBOCbcPJrz89oifvD7ixTc8bg09Yliijx7eFXmSOIDmEVvgLzReN/PvBQjmbZ6ckRMC4cBeS0fpOUu4ro0nednvPtWG7Rej6/yX6ZM+RF8FZgZc/MX3xsQwZy41VEaA9/ClIUYglYabtwfsrAI+8r49fOqJd+GXr+9hb8ns5CELxiFjM1Z5pDRGEu+8YkwZtQiz4KrHhTNL7O4FPHJ1gzfWG7zw8hGee22JWyd7cHEHXczCJKYMfwtQ6W1PpxBDCL5V90+MaQJHnrmgRQ9XvFKJuILGm0itdfhy7BCepH08A78RkQ12mM78SIIVUVZVgMFO63YRtw+3et2nP3AHfufjV3D97hVQCrZjxXpLAygzBUQuVITGjwdKqKitouMBGM61IfiGnIHKqGgLXFg5vP/BFe67cx/P33gDP3nzMo7yFXRMiy4ZwDEleWg+xvBuBEAHBGKQoAtEy8bPp83pXkYtk6o1z2v4Vp+M0Ye9ypCfyxrThCFuoEOs41ugiy86j5IdXnt7g8cfOId//Ln78cvXekzbipO1VQ3maaAXXEGu9HiDp6do+MkqieVzU1SoijLSeGOloIWAkY5oCTvLPTxyj8Ol5Zv48etv47XxPUBdwfuE6itiZRRYPeJ1BciIVhECY9AeLy3BB9VSgafKtYXHXuRpabGo9GI8WplhkERenb73AcuFw7BOONlk/KOnH8AXPnYZsSQcHScdKHaeWInWMqoAhKHNwze0orolzCiZN2bpUFqGE6fgjTGcGapJaB66hpD5vojV3lk8cPkWLq2fx4vHD2GTz6LzI2pgGeaBeJ/mLCMhbeYerJ2MDosS4hfjkCktNKiRtY1hbdZzxQodPUKvyWJwWMWAW0cDVl3A1776OD744B72DwdMraGPLDu8CYYbvWof2jJJjoMLDE16d5T1VatLUmQQT2ouqMy1yk+ai55ujtnTsGC2eof16hxW0z6un38OPzt6GEe4iK4raJVkrMrDVv6MsAlbxA8IiCRPXoYIrTPSxXvV7fAmvUONAYUlqveogZYikADLvsOtw4Sr53bxr7/6PvzaA3t4+/ZGnl10CiArjwrBmR7xN51Bg9L7jApdb67kmfdpTLEVEi1VerjK6LM63sgzQgdPfhADeu8xImARgOu7L2LHH6C0COdJzJTuxhPkw5kHqhoQIoOurfroq6KTbILn9nopawbDInoEmtI7dCFgtVhh/zjj7stL/Kt/+hiu3+Fx+3DCchHQdUHgxovZgRnzwmP9iCsyNEXeeGOWj4wM70marM7bC61CnZbgzNcxfeQiZwaAx6oPyPzIMOD+5fNYtC1qiJZmyjEzgtFvY4esDEqBmcPJ4QL1mc8Q5X0hlfHzD2HEo+89NkPCud0e//L334t3nSk42mQsezMSDzd3A4YnxtdOua1xWtbmjiDKPGd5sjRh7jPkFa4zz89kfSxZhRViNioaQV2eC6Gio5E9UGKHZT/insVzcJnYEecUIPg6pZ7nuSKDj4DrlNKKkGwYIUPwkRiiPE8q64MxoNA5TFPDNmX8i688ivvOFxxvK5Z9r/J4SilkWSfKZnbnhWnZ05TgDTE/o7iZvV7NDBkdDWOcgCSJr527Hf1yfDwSJxp8YI479CEQnkSIMiLOhtu4HF5BC72lIEOx41GEejJ7JKXkmxZ8rsF1dnjdBqsVU4Nn4IcwIfhBwTvsH2/xTz73EJ683uPgJGMRg3V0PiIIRQk2c/QKRC0FdEp1j/wAkk/mtoGO+fsUM4xWi+HR00pkK7lkl+pBCtDx8+i94ND1ER16KA9aRkaPS93PsFOORNICDSauF+GYojw5jcGykgmCkfUWjs1Z9ah9IaVXMhq9FWI6HB4lPPHgRfz2hy7h6HBAH3joOUeFsjTE3BfQyzP/tlRg3luYsKnR66o30sJDEfhEyYl01iGSOxiEF4sYGlfsLqhckr4oqioQY1MkOCyQHSNig/P9zxBib97oAN9ZafdLOtYqkY4Zi+6HjRzrPq/Llka0koeIBA3mX/T4ym/eB1dZpzt5QEeTeU/LDG+YUWHcUZ0bc1wN/0ysWBFZy9W5WZUQpeZDs8bA15bKKmGJ8c5raRxCtCoJeY214TSAAoBGrQ45dDibXsfaXcPQrRBpJZFZo8bCA4EIu0yRfN2zMXI5xkBCx4kOBycTfu3h83jftRXYGauMqPPgbzu8ysop3glTjH6qrOiQs2ChToxCBSuNCRc0hMWp8YAZP+EzI5s9A5lblsAhfEBGc6NAVOBLpsfzEEF8hm8EwAEX3U8NX+hqqyeKPMWSehmmUqculhhBoCdx8uzyefMsNbyBRfD47IcuI9RkuSdjFpU8hqXcoaI7e3T2rJ5TQzLXG72PdXqWLIqOYOJJNUOqGqsX+EX9hmOzy3zme+3eSLRyJL8qos8ETaUQCReVJ7/ETruJHoNhAf0VKzxBj/+2mmjhL+LkADZI0iJ8BYlS5xuGVPHo9bN4/NoetgPD30DFSAa9aEqPhSfbYoYTLUoU5YmZw0Y7lbBUgBjBLG8MZ1YJRocAgsBk0apOkdxduW3YIiORGbJlRECoZIwJrSZ4RYU5hAYkyWn1BGfLTWt/Q7HQJ0XnIWcCpIpCZ/Mczkqnp5XFxKLDmAqefM8FrJinAidrkVQmxPSM4vHA/ADrmHjTjFYrPe+QGn4Q9TnloNQ56+JMAJMiRE4gz/CMmbltRb/UisScn/GDn1WkOlnoszoElm2W15lLhFix015HjExH0yyJa6xABDyCHe+HRjCmYzjllRuReRVwdrnEE/ftYkqzijK/zCxFSxNF51KjhoMWteLG8DKAsWoiT849uSiWFBkTJsT4W9Z1qdhQIdJrskcu2Z6bOzc6b5zoeYZ/QaLn0Ikw1TbpGsQG75eI7jZ6N8i7ktpIp2kEZSwdZ4BuMGTiKT8XMQRsNxPuvbLEu+9YIJGuiqYKbVSnTemdy5FOadRZXZ+6MlrTKLV1oaeClnun7RX5MyKAylxUQs9GEZ1tqJkcIlnEMErUaLH/TyipoNJAjo6gmsJehJ+t5h+xDljWffjYoSPoMmqpcVFVooNIkjpCeFUaSP8i6YgddbaE99yzg9XS6UYt6017tfI1H34OYh1aepxpcrSoZTQbHOYkS0xnpIUtsCLAFGR6z+IhK5zNmwk1ZBM1skdCkeeHPCHT8ygo7BoLMaAg+k44xI+U9se7aQE70wEoyXZ8PpIWB6lXwi/RjwrPjiqaxhhNSif56HDXBbYcZk3T/UzAEL7JW5Y3igyFxEx8ftF/GXhVanizVj/PDWqdTG84rdFEmfkahXW50BJ8kkIKc36WaKgclWqKkXpcHpp6U7bP91S6be6ASJA9QkBSOeVLeRwaiuVc1y9WifhPnVPFiJUtOpzfocdoGUP3WeW2D1aDznMTzE7TYu7m5s5PaMDQl4H4yXSPCZq8ZTUhuowBb54Fd8+Q46HpYQaApPGKqSSkNKEmk3ylI4CG5PUculIEoIGq9TxTiG2L4JMxQuqFVHoIezNAE8/7jhFCzp0Z2fRoxTI2nN/rjJHq8paTpjrPB9Nzp0kw/2mktzyV0Vu9RPWeXm3yLnNaxKcyvgzodH0Ro4ZUk1KQBCiJ5mcM8+GLQBGo44jSJgthYoV6J4Y1J1XipObRVhBJnMh4qS+whC6oarH0U8wlLvBuiANMAdZTojyAnQVpKVPA9Dq2r0ZozBiWwzNPnwmKDq1EZmRY/tN7p1MlhqCxP49cKWjOVJTu1imKTYXUQ83/9gWVNFxZSHV5QJ3IDQ1opRUgI1MMmdPPHNbBtaT+wOM8nM/WGU5zD6AXz46KzA8WAMcyZKoGuykeYs50q+3KW0NUHlRqlUi+6QAaXMwNjgzBFEE1vs6DyTZ2DRtU0KMW7pTVlQatCeFJcmodMWWHmAo244TtlJFz0dBFZa0W5LkZC6K6ycYnJEM0rgYmWezPxmzWD8wTIoMvQjuZYE6sgKbJRSGGum1ZxsrPDITK2flxPcmcZfki2tMANMrpDMfKGr3Y0lzCZkZHdYwHVikrWepQKpPEENWhkkHh2OcRm3GroQkfz5Whb4dBsRTgsE2zSmEDOQlva1IZlfQpn7KDZNRw3uUlzhL16SIOAFqIkvlJizEWWn5CcEuwFTFA4/9NbTxlbfL6zOjoXnV26gIZthW5kLRwvFiMAvMIUoB5UIeaiA1GdgrNwfLH1yb7rTPmzMqpkC+s/7xm6+DIEWbHBJqgsnoFgeNcsNBcmmcQ1Bhs4kwcyDWb3K8BIrtMi/TInCJY0crjxNJiXdhp2bNxuOidhfRpP6+w4sEZfqzjvO5cyuRREyHJ8uQs+k0HP00L/hYJUIkk9gjl04QpTTJSYfmbJvsMfTZ9Z1lPXGG1oIyuEW4p7zReOXgNUdQvcSxG3kAvmwonrGELEBgJJCAsFTU5HJ1MoIqgNkYBYEqJwp8HN6XTRlDMI4beDIb05Cx8GbLz3zwfXcmSV+jNqt5fUcEyR3zKSY+R6mSmQx513ZQTpnHDFkGcgPcpikt1yRtoki7TEdITGR01a6gauqUZLLOjXdjEmnghYD+l+eQCbK7LiNiRW0/YXw+AP4/mstDXwp4oPTdF8jKZoU1Y2Ocbl2com9crSQgLlCzN0GeoFk2DS+VhGwoPRzAk+BSHzAicJuSUMGVWeme/pxG5ctJjEkItxh8t9YyMqd6kSYdJAsgOMS7l3caGyXEq5JET9Ukb/rAjJRUXFmgTI2ext7dvs9aajk/GQCtae2qlznDQckfGJ1qwjGnmTy9kC2WGamuY6DWpP7pLC2GmQeXjfB0NMqnMMT45NSLI8XFfRoGyjCmqTTbH5/gSAiFTl4bIGn2pkAdizh5q6BH5mHQBq1jsFtU2zyA973jA8+C0JkPn5ZsH2Ey8udO5vOU1Q1JnsJPYlJeipA5j3GFKNF7hMHY+tFUKM0gxUpSYFkm1v+QJI8nOnBLTlHQfvAYjgeRoYoRU6yNUOVgR9LthovHpSZIqGbnADQmLFQ3A7pZ81wyqLpZ4Eez3PAE8lfWTbmYZHW68cQuv3TzS0MM+yKi70FxkZQ51HkjV1zo+kSBpfdayEtxY4ogBmgEiKzoIHUqHxvJncwIaI9MYaRJRYnqUqSAlC3GNzwhwM1hKUxSvMMKm+q6dAwJbQtu5A4UlnRE7L3eYkDWDO8mRYpiMMSHSI+r2+g75JOP//PQID105a5YlcdXQjWFkdFdMURzAKgANI9bGKBFSMz3YzAgBTc5iJ0OYcwxXq+UsaQz5Uli7qfCQGBEHmFZJpdMSay6VCqiI5tlB0iGnyjFJZqdqIIlrdRWuJklrUX0dsWxWnTWl4p4DO0qbAHtPelonuDSCe0R/9eNXcTSatEVLK8c127NRt3JYJGZCrYPylaHLMDeDEOVFUxQNBaPSSADIxSt2x5S22oSpniif1Tew9GVrf0dyAwZ5HlEmmzEwhZQGMtCInLYo2fBCfC2PwPIK0vI8XNqCDFdbCjS2hpEE9smYIqV2UlXqCuO0RU0b5HGDvst4+car+Ksf/gyrZUTmi+hNoiula7E9/kfkn+mnDmA8XfWaIV1YxyczViLQ8fD0vJGg4sj4NkAagWFCmkZ5fxxJiCa0aUClgelVhr6mTdbGslFicIldNhqXUTUhkR5ffNiEUkYVnVXFIy0t2TZrlW7GL4FyQiTxKKSUlJhrRNcK/vNfvoAPPPYueMcyxP7NBAz2AEaJjb9b+BPQaBSqPDMb1E1OmASgRV4TaNYBU2JIV7E+cvwtiU9tmDYTptF6AaPiHNUx5dgLOM0HlD3SAYgfvSJBVSpv4Rd3YnJXkY+oB8yTJaYpp1OT5G/bzSD5EgiwwlArJH/WeLlHHibsLRb46Y2b+E///Ud4+qMP4+DgGP1CmvQvJCy1sYbA5NdWIk83QkZMKm8MOaAmo8elDIoIRgDrOxekplL02mliszMh1a0qMJuz1EZ0zqR6EWqB2GRzCR9UKdQLaCCTgXOPYBqoHRwhhoVAke+jIqSGllyCE6OZ4nPpg3+N07SxLsuNqOygSoeLZ5b4j999Hk8+dBeu7gVsBgoLtLRNZwg/zM93+nJSWc0Aif6zgJkmKbv8yXmLVEekkelBxpewHU6QyBvGjO12jQ2FD+0LaIvH5G4pztzyokSv5sA4RjZi5boVWjqC23k3pv4y/HQs2s70s2EtW/Os8aAUiGR6pQk4o6neT3zkM60L7KMrdnd24ONSk1u2BXddvYw/+ue/h75mpDFZSdJWBXOZKh1rMLvJJo/wuawDjxJWWefZ2EzjCXIZMUwThpHPT4qC9TBhO47Ybgd1fvQYVWqljUCKLJDbpSbKMH1Yx7N2iSJqGlHRwb/rt2wUxryWvmPrNsYFHLj8lVS5KLbS8732GLXaEzc33hE8hw2pK2Vom/p877kjPJtexh/94T9DGivSNNksT7KYKbSstdTkWMOZ06z/Y9nIQwp1Xk/1fcA0MfwrpmGDYRqxHdmATUJ6gaqG/9ZYMaJoSHH+EEShuXZHg3MExpQi+IWLTxlIprUJqgI5vp6upuTlsGm2M3DapjuX1T8ERtnvfvHvNS0xzWoX0ZrC1TCOajZ+/vOf4xMf+zC++g++jHEzqnZrA0wsh4Zgm8syxbpe5fmcB4zTiRoiLkTScyOjYCgYhhGbOiJzf3A76YctLY3KFBSmlDqzQIb7rC9wNlmdjMmbzyWgu/B+uNU1RHeCoDVcWiJKBSKHUbOpamFSmdFgprt1k+KCf/+Lv8G4E6AErspwYa0Vzes0iHQer73xOj7w3vfg85/7gkJ0WB8a8yP9JK1lt5eZ2+rpkMcJA+msmzBtRuQpYWKjQ+AbC06mhHEYkcesrk+cjQgvFaeisAkiPmRSY3Uwpgpl20DrAnCwXWEz7cJT0GFF4G4R9yD6M7ZCFyJWu2fRL1Yaisaeac5SynEZR4Qc8QW43/r4+5ptaMwDx1nb10SFDYh3WCwibu6f4O67ruJLn/887r7rCtbrY6TRenXambydXWGetjrU2Com5jb/PjRp/Ik4sMnYDsSCQblN2GdbTOxQu8uFR9LzNGG7HTEkrWtisVgIJxb9Enu7EQtH2c3WavJQMeaC9STcF80m52okam7S3HO16NEvOow0+pTAvQj2Ie5vf+p92itU56Ve+3TIMY+y5yaoix5Hxydamfv0pz+GJ3/lV6TJbdb7SBQymKdlRGI9nxgHDdPJgDGxAjiF+jhssN5upQGwmxvEIK2RIY4Q/Fge6fRhsp7g7Jkzmj/u7x/grsuXEEOndON8koeQnImG5WIxa/8NXU9Pm7Sv+YMaIds6I5CnNGK3n8/7maceP1X5FR6mgM8bFmaZd4hPF3uklLB/fIjr996NT37ig3j35auYxgGDaKvpetthVMizTyfQDalg2BoI8v1bSV8sUZxKRYSeUjkwDFvkwVryxlz2Hvu313jtxi386KVX8OB9V/FLD10TqdkOFHL8O4pRFzula+hsLEbjxH5py1GsJMLHihh7jc5Od+vcJz/yWJPUbaujs2xsSxN2flueMBmAunoQFV1v1nr+2r134fFfegR3nN+VIkNmRwAdtwUpT0Z4BlN2uXtA0eIgDQpFpt3R8QYvv/IGhoEVoqCLAcfrLc6d2cP5C3v4y//1Y7mApZqRtup7PPHe9+DuqxdkeOY2I/dkmLTRHkjS2IlSNZqHQXSomkcjw/NhOBOIcJ/88KNSukS0tO9jY3F2Q5pisX5qemvbf7YYxckrmxpWC/KDhksXzuLyxbNYrFbopBRlqTpEZq63Ub+j4rQ+PMJ2pC7QcOPVm3j9zUOkRIKkgfw8jrEBCz+f+4omZNv3CJg+bNeXi04t++5iF48+cg1nLnY4PtyiF6dho2dTbK0GnK4rSEWe9xi1s+ThPvXRRzRmsXHVnP9cliJUUm9Llq8zcxQyc019MSstzGFK2VJ6a1Mo6tsfXGtbdOot9vfXmLYZx28c4ftv7ePckt8FoITV0HWsOsDJxlZpT1fxeC1yBF5vb3eB/YONQpl/b65gIi8pBD+SG48PPfEY7r33At66fWjrcqxhimKtU6jQcVJkrZVNkiSWnllRYG4akVN3L1NC6KPt808J57ghTgGTshIazvMG2KSkomVKLlXscO5cHfouYpgqjrYjLpzpsb11hFfeuIVXb62x3QB/+ORDuN5HfHv/GOd2lximrCHlCbkAF6AccDKO6HzA2Z0Fln3A4dGAvOyx2ulwsplkXEYLn/OV6zAkYRXf+8HzqP5h3P/uizheD6pOE3uP03YbQNICpWWAtlc5T92OprlRJLBlycXc8bF2BuydWUou58h50dtmBb3NANrA4cy5BbpgJYnNzp0XFthskrqwF3/8Kp66/348/sELODy4ifNdj49eCHjphYQXD0Z5aMH67IC91cLglp1hLTgeJ1zY20HTwkPD7rLD8Yl1p7ae4LRILWwg+0wZ3/v+czg4vBdXLp/D7iJib3cpWOsYySiYuIDBGBg4OQLcIiJKaVWSiDaJ4ZFB0bJ8/M1DhiY/yGOTNkYk+DULH/HoTsT2YINXD9bYvXIJe8sFfvCjW3j1jQMNW0iAPnztAfzG4/fj2X/7Z3js8Qfx1v5NvHdviR/cOMT5szsYRvJ7ag8MVGC5iOgbI7DgrYNjI6ic7jiPZR+1wLm36LSez9LMFNqM5ArMWI8XXvwZXniR+4QBF8/u4I6LZ7G3tO2w86sed15YYdONGErEZl0Qe+4Xapa+VENE6KPGwskp84YHZ90Ve+JSSeIyVcbdvcOVn7+FP3nhTVxaLPDXP7yBEzjcYBcF4NJygWXXsN4e4L9957uYNgVxDPjW/34D733gXfgbt0f8z7f3sRMCNrng4pkVzuwscbjemvpmOq9Y5u31Bpe7Mzi72+HN/Q0ONxW7xJfdpZy0WnBFxsGPDPR+bsoy3rp9rJ/TPwvuCcSA87s9jrds2AD3dz/zOF+xd7phrRVz1WCiqH0vj9a0cZhHYBvKXJoSDtZrCRdHa1qUIzAzmKbD+uZJwrXdBZ7cXeLbP3xbYsT1Oy/jgw9ewU9u7ePPnn8Vy9UuUr/ES6++gp2uF72eSHu1XjtPpLQTGHDlwh5uH7ORMmFzESP2dnoxVX4bjc0So2EYCIy2FsfqxW1RfT2H7YskPZtj9jGuo3Pt+8H7j+aSWyCz0N6gyJd2cLRnpy822EZ0Wdg3sU4csNq7kytGOMuWk8PpebLM6a++I5An7J+M+EHssHj4Is6dWeF3rt6Ff//dv0brFrgjerxwax8usrurOC6cD/ziz6n6pApeCg7X5Bg2WWK6bEmqDhMbYixXHXZ3OpzZ7Q0Y2ZnOKaWJNjVF7g028oZWc3VuSun77vf+zgf+Yezdv8mkaUzGee1NSjKbItt8lGzG5QIONznFUZmh/q5RdJS6o2WLZJNZPreZMhcQFBVdr/1S3D46waLrcXI0oHZBuX58vMHZ1VINlEoqB6gEOw8siPrcEKHRp8E2vTXFPp0XQn0A9xxYMYbR5hzcdFOpm8kAt2C1GWo7MTnwaySl/X68uNj505v55Et9t3xqnIbkW+E3EDh51Ko5ebpWF1lWThL6bomd3SVKYuvLQ3MUxQLJRYaExYL1Nwonzu/uYLs9UThHLDXrP3PuHIZhg7079rC7u6M9IcpnShl+nZbEqYvqJ2R4WyrQ+MwSggxOK5jzpMpKMSOWZfLWPnWBjJOThPWWwop1q1SVGTgp8Wtf6FJO33Hr4U/l3qf/1uPX+27xrS76x1JurZZSD9drf+n8OZYC4YLG17Vidy4tKVV91VWLCezlqehMBaudpcjGNAzoiCX6fmFG4LiK/Jxe4VYoG56xYhjIAWbW15PHLzSmN9aXtenFRodBoKUqdpmZYy/t79n8YV4+5QOLwMhsOBkyFotddJErOLWVlGtrzTvnXcrlueFo/dlv/8X/fck9A/hngfqZX33wHrez+JoL9QuLRRdijMis/5HTVaqqth1iezjzV06oldasL0f22s3j932MbWlYmZIBqNbiLC2G7QbLvR0NRZnXvtfGkzQISmaU5cYxYdhu9Xqek53hol9hZ9VLcxQLcT1jTnSYUg+/z0AQ5lIV2eTReovYLWwCzJ/OsyMtpZRv7N15/g++/vX/euOZZ+ZvB/Mvzz5rdnz6N5/49VzD0w31E8G3aw5ueTpYsYaJ+WeMSoLIqVn4hQsSKX1PZS6tWmYimtv+L+mxtmgoaxGZ2TlutvpiVNfvqmPcPbODfrnE9ngtw/d9xGazlfAi9qbDRBEgrb1TltNX4shh7IsZxBDbSKWk44Za8TJc+/Ouj9/8k29+z74+P68X/j+rL3R9HQi+KgAAAABJRU5ErkJggg==" alt="">
+    <div>
+      <h1>Rover</h1>
+      <p>Browse, search and edit a Revit model from one modeless window.</p>
+    </div>
+    <div class="quote">&ldquo;Where am I?&rdquo;<br>&ldquo;In the Village.&rdquo;</div>
+  </div>
+</header>
+
+<div class="wrap layout">
+<nav>
+  <ol>
+    <li><a href="#start">Getting started</a></li>
+    <li><a href="#window">The window</a></li>
+    <li><a href="#document">Document tab</a></li>
+    <li><a href="#families">Families tab</a></li>
+    <li><a href="#search">Search tab</a></li>
+    <li><a href="#warnings">Warnings tab</a></li>
+    <li><a href="#database">Settings &amp; Database</a></li>
+    <li><a href="#editing">Editing parameters</a></li>
+    <li><a href="#trees">Tree right-click menu</a></li>
+    <li><a href="#keys">Mouse &amp; keyboard</a></li>
+    <li><a href="#tips">Tips &amp; troubleshooting</a></li>
+    <li><a href="#files">Files &amp; settings</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="start">
+  <h2>Getting started</h2>
+  <p>Click <b>Rover tab &rsaquo; Browse &rsaquo; Rover</b>. The window opens beside Revit and stays open while you work (it is <em>modeless</em>). Clicking the button again brings the open window to the front.</p>
+  <p>Rover reads the active document when it opens. On a large model the first load of <b>Entire document</b> takes a few seconds; switching tabs afterwards reuses what was loaded. Press <b>Refresh</b> after making changes in Revit.</p>
+  <p>The window follows Revit's dark or light UI theme (Revit 2024 and later), and switches when Revit does.</p>
+</section>
+
+<section id="window">
+  <h2>The window</h2>
+  <p>The title bar shows a line that changes with what you are doing. The <b>?</b> button beside minimize opens this help (or press <kbd>F1</kbd>).</p>
+  <p>Under the title bar are the five tabs, followed by toolbar buttons that act on Revit:</p>
+  <table>
+    <tr><th>Button</th><th>What it does</th></tr>
+    <tr><td>Pick in Revit</td><td>Pick an element in the Revit view; Rover inspects it.</td></tr>
+    <tr><td>Isolate</td><td>Temporarily isolates the highlighted rows (or the whole list) in the active view.</td></tr>
+    <tr><td>Zoom to</td><td>Selects and zooms to the highlighted rows in the active view.</td></tr>
+    <tr><td>Select in Revit</td><td>Selects the highlighted rows in Revit, or everything listed when none are highlighted.</td></tr>
+    <tr><td>Refresh</td><td>Re-reads the model for the current tab.</td></tr>
+  </table>
+  <p>The Document, Families and Warnings tabs share a three-pane layout:</p>
+  <div class="panes">
+    <div><b>Tree</b>Group by, filter, the tree, and a footer.</div>
+    <div><b>List</b>The elements or types under the selected tree node, with its own filter.</div>
+    <div><b>Inspector</b>Parameters, API members and relations of the highlighted row(s) &mdash; where editing happens.</div>
+  </div>
+  <p>Every pane has its own filter box. Click its <b>&times;</b> or press <kbd>Esc</kbd> to clear it. Drag the dividers between panes to resize them.</p>
+</section>
+
+<section id="document">
+  <h2>Document tab</h2>
+  <h3>Scope</h3>
+  <table>
+    <tr><th>Scope</th><th>Lists</th></tr>
+    <tr><td>Entire document</td><td>Every element in every category &mdash; including Views, Schedules, Sheets, Groups, Phases and Revisions &mdash; plus useful uncategorized elements (Families, Fill/Line Patterns, View Filters, Project/Shared/Global Parameters).</td></tr>
+    <tr><td>Active sheet</td><td>The active sheet (or the sheet the active view is on) and everything in each of its viewports.</td></tr>
+    <tr><td>Active view</td><td>Everything visible in the active view.</td></tr>
+    <tr><td>Schedules</td><td>Every element listed in any schedule, grouped by schedule.</td></tr>
+  </table>
+  <p>Tick <b>Include sketch &amp; helper elements</b> under the tree to add sketch lines, automatic sketch dimensions, rail paths and other internal elements.</p>
+  <h3>Grouping</h3>
+  <p><b>Group by</b> offers Category &rsaquo; Family &rsaquo; Type, Category &rsaquo; Level, Level &rsaquo; Category &rsaquo; Family, Workset &rsaquo; Category, and View/Schedule &rsaquo; Category &rsaquo; Type.</p>
+  <h3>Opening a view</h3>
+  <p><b>Double-click</b> a row to open a view that shows the element, select it and zoom to it. Rover prefers the view the row came from (in the sheet, view and schedule scopes), then the active view, then a view placed on a sheet (a plan on the element's level first), then other plans and a 3D view. Views, sheets and schedules simply open. Tags and other view-specific elements open their owner view.</p>
+  <h3>Export</h3>
+  <p><b>Export CSV</b> saves the list as it is currently filtered.</p>
+</section>
+
+<section id="families">
+  <h2>Families tab</h2>
+  <p>Every family and type in the model, grouped <b>Category &rsaquo; Family &rsaquo; Type</b>. Instances are never listed &mdash; a model can have far more types than instances.</p>
+  <table>
+    <tr><th>Kind</th><th>Meaning</th></tr>
+    <tr><td>Loadable family</td><td>Shown in the Project Browser under Families.</td></tr>
+    <tr><td>System family</td><td>Walls, floors, roofs, ducts, pipes, railings, stairs, filled regions&hellip; also in the Project Browser.</td></tr>
+    <tr><td>Internal type</td><td>Types the Project Browser hides: text, dimension and view types, fluids, pipe schedules and similar.</td></tr>
+  </table>
+  <ul>
+    <li>Pick a <b>type</b> to edit its parameters or rename it.</li>
+    <li>Pick a <b>family</b> in the tree to edit or rename the family itself.</li>
+    <li><b>Duplicate type&hellip;</b> creates a copy under a new name.</li>
+  </ul>
+</section>
+
+<section id="search">
+  <h2>Search tab</h2>
+  <h3>Find value anywhere</h3>
+  <p>Type any text and press <kbd>Enter</kbd>: Rover searches every instance and type parameter value in the chosen scope. Add a Category condition first on large models &mdash; it is much faster.</p>
+  <h3>Query builder</h3>
+  <p>Add condition rows of <em>field &middot; parameter &middot; operator &middot; value</em> and choose <b>Match all</b> (AND) or <b>Match any</b> (OR).</p>
+  <ul>
+    <li><b>Fields:</b> Category, Family, Type, Name, Level, Workset, Element Id, Class, a specific Parameter, or Any parameter value.</li>
+    <li><b>Operators:</b> contains, does not contain, equals, does not equal, starts with, ends with, greater than, less than, at least, at most, is empty, has value, matches regex.</li>
+    <li><b>Numbers use project units</b> &mdash; <code>12'</code>, <code>3' 6"</code> and <code>0</code> all work for lengths. Yes/No parameters accept <code>yes</code>/<code>no</code>.</li>
+    <li>Open the Parameter or Value list to see names and values found in the model.</li>
+  </ul>
+  <p><b>Scopes:</b> entire document, active view, active sheet, the current Revit selection, or the current Document list. <b>Include element types</b> also searches types.</p>
+  <h3>Results</h3>
+  <p>Select, Add to selection, Isolate, Export CSV, or <b>Open in Document tab</b> to browse and edit the results with the tree and inspector. Double-click a result to open a view showing it.</p>
+  <h3>Saved searches</h3>
+  <p>New / Save / Delete manage your searches; Import / Export share them as JSON files.</p>
+</section>
+
+<section id="warnings">
+  <h2>Warnings tab</h2>
+  <p>Every Revit warning, grouped <b>Warning &rsaquo; occurrence &rsaquo; affected element</b>. Revit errors are prefixed <code>[Error]</code>; elements that are only involved (rather than causing a warning) are marked <em>(additional)</em>.</p>
+  <ul>
+    <li>Pick an element leaf to inspect it straight away &mdash; fix it in the inspector.</li>
+    <li>Double-click an element to open a view showing it.</li>
+    <li>Other groupings: Warning &rsaquo; Category, Category &rsaquo; Warning, Level &rsaquo; Warning.</li>
+    <li>Press <b>Refresh</b> after fixing to update the list.</li>
+  </ul>
+</section>
+
+<section id="database">
+  <h2>Settings &amp; Database</h2>
+  <p>A Revit Lookup-style browser of the Application, Document, Project Information, Units, Phases, Worksets, Design Options, Object Styles, Line Styles, Fill Patterns, Materials, Project Location, elements by class, shared parameters, Extensible Storage schemas, registered updaters, links, CAD imports and warnings.</p>
+  <p>Blue values open the next level; <b>&lsaquo;</b> goes back. Methods such as <code>GetDependentElements()</code> run when double-clicked.</p>
+</section>
+
+<section id="editing">
+  <h2>Editing parameters</h2>
+  <p>Highlight one row &mdash; or several &mdash; and edit in the <b>Parameters</b> tab of the inspector.</p>
+  <table>
+    <tr><th>Value cell</th><th>How to edit</th></tr>
+    <tr><td>Text and numbers</td><td>Type and press <kbd>Enter</kbd> (or click away). <kbd>Esc</kbd> cancels. Numbers use project units, e.g. <code>10' 6"</code>.</td></tr>
+    <tr><td>Yes/No</td><td>Click the checkbox.</td></tr>
+    <tr><td>Drop-down</td><td>Coded parameters (Function, Location Line, Wall Closure&hellip;) and element parameters (Type, Level, Phase, Material, Workset&hellip;). Pick an item, or type a name and press <kbd>Enter</kbd>.</td></tr>
+    <tr><td>Grey text</td><td>Read-only &mdash; never written. Tick <b>Editable only</b> to hide these.</td></tr>
+  </table>
+  <h3>Instance and type</h3>
+  <p><span class="badge bi">I</span> marks an instance parameter, <span class="badge bt">T</span> a type parameter. Changing a type parameter changes <em>every</em> instance of that type &mdash; the tooltip says how many types are affected.</p>
+  <h3>Many elements at once</h3>
+  <p>Highlight up to 2,000 rows. Only parameters they all share are listed; differing values show <code>&lt;varies&gt;</code>. An edit is written to all of them in one step.</p>
+  <h3>Name and API properties</h3>
+  <p>The <b>Name</b> row renames types, views, levels, grids, materials, families, filters and similar elements. The <b>API members</b> tab can also set writable properties such as <code>Pinned</code> and enum settings.</p>
+  <div class="note">
+    <b>Undo:</b> every edit is one Revit transaction named <em>Rover: Set &hellip;</em> &mdash; press <kbd>Ctrl</kbd>+<kbd>Z</kbd> in Revit to undo it.<br>
+    <b>Groups:</b> elements inside model or detail groups are skipped with a message; Revit only allows those changes in Edit Group mode.
+  </div>
+  <h3>How coded drop-downs are filled</h3>
+  <p>Revit has no API listing a coded parameter's names. The first time one is shown, Rover sets each code inside a transaction that is always rolled back and reads the name Revit displays, then caches the list. The model is never changed and no dialog appears.</p>
+</section>
+
+<section id="trees">
+  <h2>Tree right-click menu</h2>
+  <table>
+    <tr><th>Command</th><th>Effect</th></tr>
+    <tr><td>Expand All / Collapse All</td><td>Opens or closes every branch.</td></tr>
+    <tr><td>Isolate</td><td>Shows only the selected branch in the tree (Revit is not touched).</td></tr>
+    <tr><td>Show All</td><td>Shows every branch again.</td></tr>
+    <tr><td>Isolate Selected in View</td><td>Temporarily isolates the node's elements in the active Revit view.</td></tr>
+    <tr><td>Show All in View</td><td>Resets temporary hide/isolate in the active view.</td></tr>
+  </table>
+  <p>Right-clicking also selects the node under the pointer. The trees never scroll on their own &mdash; scrolling is left to you.</p>
+</section>
+
+<section id="keys">
+  <h2>Mouse &amp; keyboard</h2>
+  <table>
+    <tr><th>Action</th><th>Result</th></tr>
+    <tr><td><kbd>F1</kbd> or <b>?</b></td><td>Open this help</td></tr>
+    <tr><td>Double-click a list row</td><td>Open a view showing the element</td></tr>
+    <tr><td><kbd>Enter</kbd> in a value cell</td><td>Apply the edit</td></tr>
+    <tr><td><kbd>Esc</kbd> in a value cell</td><td>Cancel the edit</td></tr>
+    <tr><td><kbd>Esc</kbd> in a filter box, or <b>&times;</b></td><td>Clear the filter</td></tr>
+    <tr><td><kbd>Ctrl</kbd>/<kbd>Shift</kbd>+click rows</td><td>Highlight several rows for multi-editing</td></tr>
+    <tr><td>Right-click a tree</td><td>Tree menu</td></tr>
+    <tr><td><kbd>Enter</kbd> in Find value</td><td>Run the search</td></tr>
+  </table>
+</section>
+
+<section id="tips">
+  <h2>Tips &amp; troubleshooting</h2>
+  <ul>
+    <li><b>The list looks out of date</b> &mdash; press Refresh. Rover doesn't track every change made in Revit.</li>
+    <li><b>"Revit did not accept"</b> &mdash; the value isn't valid for that parameter, or a constraint (such as a top-constrained wall height) blocks it.</li>
+    <li><b>A type edit changed more than expected</b> &mdash; it was a <span class="badge bt">T</span> parameter; undo with <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+    <li><b>Find value is slow</b> &mdash; add a Category condition or narrow the scope.</li>
+    <li><b>The ribbon icon didn't update</b> &mdash; Revit caches images per session; it updates after Revit restarts.</li>
+  </ul>
+</section>
+
+<section id="files">
+  <h2>Files &amp; settings</h2>
+  <table>
+    <tr><th>What</th><th>Where</th></tr>
+    <tr><td>Saved searches</td><td><code>%APPDATA%\pyRevit\Rover\searches.json</code></td></tr>
+    <tr><td>Extension</td><td>Wherever <code>Rover.extension</code> is installed, e.g. <code>%APPDATA%\pyRevit\Extensions</code></td></tr>
+    <tr><td>Title-bar lines</td><td><code>rx_quotes.py</code> &mdash; edit to change which line goes with which task</td></tr>
+  </table>
+  <p>Source, issues and updates: <a href="https://github.com/aaronrumple/PyPiPie-Rover">github.com/aaronrumple/PyPiPie-Rover</a></p>
+</section>
+
+<footer>Rover &middot; a PyPiPie pyRevit extension &middot; GPL-3.0 &middot; &ldquo;Be seeing you.&rdquo;</footer>
+</main>
+</div>
+</body>
+</html>

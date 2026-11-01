@@ -1,0 +1,18 @@
+{
+    "extensions": [
+        {
+            "builtin": "False",
+            "default_enabled": "True",
+            "type": "extension",
+            "rocket_mode_compatible": "False",
+            "name": "Rover",
+            "description": "Modeless Revit browser and editor: browse the document, sheet, view, schedules, families and warnings; search by category, family, type or parameter value; edit instance and type parameters for one or many elements; snoop settings and the database. Follows Revit's dark/light theme.",
+            "author": "Aaron Rumple",
+            "author_profile": "https://github.com/aaronrumple",
+            "url": "https://github.com/aaronrumple/PyPiPie-Rover.git",
+            "website": "https://github.com/aaronrumple/PyPiPie-Rover",
+            "image": "https://raw.githubusercontent.com/aaronrumple/PyPiPie-Rover/main/Rover.tab/Browse.panel/Rover.pushbutton/rover.png",
+            "dependencies": []
+        }
+    ]
+}

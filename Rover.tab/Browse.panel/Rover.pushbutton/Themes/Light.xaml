@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Revit light UI palette -->
+    <SolidColorBrush x:Key="rx.Bg"       Color="#ECEEF1"/>
+    <SolidColorBrush x:Key="rx.Header"   Color="#DDE1E6"/>
+    <SolidColorBrush x:Key="rx.Panel"    Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="rx.Raised"   Color="#F3F4F6"/>
+    <SolidColorBrush x:Key="rx.Hover"    Color="#E6EEF8"/>
+    <SolidColorBrush x:Key="rx.Input"    Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="rx.Border"   Color="#C6CCD4"/>
+    <SolidColorBrush x:Key="rx.Hair"     Color="#E7E9ED"/>
+    <SolidColorBrush x:Key="rx.Stripe"   Color="#F7F8FA"/>
+    <SolidColorBrush x:Key="rx.Text"     Color="#1C2025"/>
+    <SolidColorBrush x:Key="rx.Muted"    Color="#4E5763"/>
+    <SolidColorBrush x:Key="rx.Faint"    Color="#5D6672"/>
+    <SolidColorBrush x:Key="rx.Accent"   Color="#0B63C4"/>
+    <SolidColorBrush x:Key="rx.OnAccent" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="rx.Sel"      Color="#CFE3FA"/>
+    <SolidColorBrush x:Key="rx.SelText"  Color="#0B2A4A"/>
+    <SolidColorBrush x:Key="rx.Link"     Color="#0B5CB8"/>
+    <SolidColorBrush x:Key="rx.IBg"      Color="#D3F0DF"/>
+    <SolidColorBrush x:Key="rx.IFg"      Color="#145C36"/>
+    <SolidColorBrush x:Key="rx.TBg"      Color="#FBEBC6"/>
+    <SolidColorBrush x:Key="rx.TFg"      Color="#6B4A00"/>
+    <SolidColorBrush x:Key="rx.Warn"     Color="#8A5300"/>
+
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#CFE3FA"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#0B2A4A"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#E1ECF8"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#0B2A4A"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}"                     Color="#1C2025"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"                         Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.GrayTextBrushKey}"                       Color="#5D6672"/>
+</ResourceDictionary>
