@@ -74,6 +74,7 @@ Rover.tab/Browse.panel/Rover.pushbutton/
   rx_theme.py                      Revit theme detection
   rx_quotes.py                     title-bar line for each task
   rx_util.py                       debounce helper
+  rx_splash.py, splash.png         splash screen while the document loads (replace splash.png to customize)
 ```
 
 Saved searches are stored in `%APPDATA%\pyRevit\Rover\searches.json`.

@@ -71,12 +71,33 @@ def show(uiapp):
     if existing is not None:
         try:
             if existing.IsLoaded:
-                existing.Activate()
-                return existing
+                if type(existing).__name__ == "RoverWindow" and type(existing) is not RoverWindow:
+                    # opened by code from before a pyRevit reload: replace it with the new version
+                    existing.Close()
+                else:
+                    if existing.WindowState == WindowState.Minimized:
+                        existing.WindowState = WindowState.Normal
+                    existing.Show()
+                    existing.Activate()
+                    return existing
         except Exception:
             pass
-    win = RoverWindow(uiapp)
+        AppDomain.CurrentDomain.SetData(APP_KEY, None)
+    splash = None
+    try:
+        import rx_splash
+        splash = rx_splash.Splash(uiapp).show()
+    except Exception:
+        splash = None
+    try:
+        win = RoverWindow(uiapp)
+    except Exception:
+        if splash is not None:
+            splash.close()
+        raise
     AppDomain.CurrentDomain.SetData(APP_KEY, win)
+    if splash is not None:
+        splash.close_after(win)
     win.show()          # pyRevit modeless
     return win
 
