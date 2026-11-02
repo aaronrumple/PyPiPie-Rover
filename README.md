@@ -30,6 +30,7 @@ Rover is a [pyRevit](https://github.com/pyrevitlabs/pyRevit) extension for Autod
   - Yes/No parameters are checkboxes.
   - Coded parameters (Function, Location Line…) and element parameters (Type, Level, Phase, Material, Workset…) have drop-downs.
   - Read-only parameters are never written.
+  - **Patterns** give each element its own value: `A-[Name]-01`, `D[##] [Name|upper]`, `[Sheet Number] - [Name]`, `[Name/old/new]`. Use them to bulk-rename, renumber sheets or set Marks. A preview shows the changes first.
   - Each edit is one undoable transaction, *Rover: Set …*.
 - **Select, Zoom, Isolate, Pick** in Revit. **Double-click** a row to open a view that shows the element.
 - **Filter box on every pane**, cleared with × or Esc.

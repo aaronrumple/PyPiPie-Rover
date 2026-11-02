@@ -34,6 +34,7 @@ import rx_edit
 import rx_theme
 import rx_quotes
 import rx_search_ui
+import rx_pattern
 from rx_util import Debounce
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -1348,6 +1349,19 @@ class RoverWindow(forms.WPFWindow):
             return
         if text == rx_edit.VARIES or text == rv["Value"] or self.pending.get(slot.key) == text:
             return
+        if slot.editor == "text" and rx_pattern.is_pattern(text):
+            if getattr(self, "_pattern_busy", False):
+                return                      # the preview dialog took focus from the cell
+            self._pattern_busy = True
+            try:
+                self.pattern_edit(slot, text, rv, tb)
+            finally:
+                self._pattern_busy = False
+            return
+        if slot.kind == "P" and len(slot.targets) > 1:
+            self.report("Names must differ - use a pattern, e.g. A-[Name]-01 or Door [##]. See Help (F1).")
+            tb.Text = rv["Value"]
+            return
         value = text
         if slot.editor in ("id", "code"):
             value = rx_edit.resolve(self.doc, slot, text)
@@ -1410,6 +1424,66 @@ class RoverWindow(forms.WPFWindow):
         picked = forms.SelectFromList.show([label for label, _ in opts], title="Set " + slot.name, button_name="Set")
         if picked:
             self.post_edit(slot, dict(opts)[picked], picked)
+
+    def _list_order(self):
+        """Element id int -> position in the list as currently sorted and filtered."""
+        order = {}
+        try:
+            for i, rv in enumerate(self.table.DefaultView):
+                order[int(rv["Id"])] = i
+        except Exception:
+            pass
+        return order
+
+    def _current_text(self, slot, el):
+        if slot.kind == "P":
+            return rx_data.elem_name(el)
+        return rx_pattern._param_text(self.doc, slot.find(el))
+
+    def pattern_edit(self, slot, pattern, rv, tb):
+        """Work out a value per element from a [token] pattern, preview, then write them in one transaction."""
+        els = [e for e in (self.doc.GetElement(i) for i in slot.targets) if e is not None]
+        if slot.kind != "T":
+            order = self._list_order()
+            big = len(order) + 1
+            els.sort(key=lambda e: order.get(rx_data.eid_int(e.Id), big))
+        try:
+            pairs = rx_pattern.expand(self.doc, pattern, els, lambda e: self._current_text(slot, e))
+        except ValueError as ex:
+            self.report("Pattern: {}".format(ex))
+            tb.Text = rv["Value"]
+            return
+        changes = [(e, v) for e, v in pairs if v != self._current_text(slot, e)]
+        if not changes:
+            self.report("The pattern gives the current values - nothing to change.")
+            tb.Text = rv["Value"]
+            return
+        dup = rx_pattern.duplicates(pairs)
+        if dup and slot.kind == "P":
+            self.report("Pattern gives the same name more than once (\u201c{}\u201d) - add [#] or [Id] to keep them apart."
+                        .format(dup[0]))
+            tb.Text = rv["Value"]
+            return
+        if len(pairs) > 1:
+            lines = ["{}  \u2192  {}".format(self._current_text(slot, e) or "(empty)", v) for e, v in changes[:12]]
+            if len(changes) > 12:
+                lines.append("\u2026 and {} more".format(len(changes) - 12))
+            if dup:
+                lines.append("")
+                lines.append("Note: \u201c{}\u201d is produced more than once.".format(dup[0]))
+            if not forms.alert("\n".join(lines),
+                               title="Rover",
+                               sub_msg="Set {} on {} of {} elements? One undo (Ctrl+Z) reverses it.".format(
+                                   slot.name, len(changes), len(pairs)),
+                               ok=False, yes=True, no=True):
+                tb.Text = rv["Value"]
+                self.report("Pattern edit cancelled.")
+                return
+        per = dict((rx_data.eid_int(e.Id), v) for e, v in changes)
+        self.pending[slot.key] = pattern
+        self.report("Setting {} from pattern {} on {} element{}\u2026".format(
+            slot.name, pattern, len(per), "" if len(per) == 1 else "s"))
+        self.actions.post(rx_actions.apply_edit, self.doc, slot, None, self.after_edit, per)
 
     def post_edit(self, slot, value, shown):
         n = len(slot.targets)

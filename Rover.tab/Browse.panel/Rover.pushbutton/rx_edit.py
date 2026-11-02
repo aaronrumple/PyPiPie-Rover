@@ -31,6 +31,7 @@ def _bip_ids(*names):
 
 TYPE_PARAM_IDS = _bip_ids("ELEM_TYPE_PARAM", "SYMBOL_ID_PARAM", "ELEM_FAMILY_AND_TYPE_PARAM")
 WORKSET_PARAM_IDS = _bip_ids("ELEM_PARTITION_PARAM")
+READ_ONLY_IDS = _bip_ids("VIEW_FIXED_SKETCH_PLANE")      # writable in the API, meaningless to pick
 RENAMABLE = tuple(c for c in (getattr(DB, n, None) for n in (
     "ElementType", "View", "Level", "Grid", "Material", "Family", "FilterElement", "FillPatternElement",
     "LinePatternElement", "Phase", "ReferencePlane")) if c is not None)
@@ -81,6 +82,8 @@ def editor_for(p):
             return "bool"
         return "code" if is_coded(p) else "num"
     if st == DB.StorageType.ElementId:
+        if rx_data.eid_int(p.Id) in READ_ONLY_IDS:
+            return "ro"
         return "id"
     return "ro"
 
@@ -142,11 +145,11 @@ class ParamModel(object):
                     type_ids[rx_data.eid_int(tid)] = tid
             types = [doc.GetElement(t) for t in type_ids.values()]
             self._gather([t for t in types if t is not None], "T")
-        if len(self.elements) == 1 and isinstance(self.elements[0], RENAMABLE):
-            el = self.elements[0]
+        if self.elements and all(isinstance(e, RENAMABLE) for e in self.elements):
             slot = Slot("P:name", "P")
-            slot.targets.append(el.Id)
-            slot.values.append(rx_data.elem_name(el))
+            for el in self.elements:
+                slot.targets.append(el.Id)
+                slot.values.append(rx_data.elem_name(el))
             self.slots[slot.key] = slot
         self.table = self._build_table()
 
@@ -210,13 +213,16 @@ class ParamModel(object):
             if slot.kind == "T":
                 tip = "Type parameter \u00b7 changes every instance of {} type{}".format(n, "" if n == 1 else "s")
             elif slot.kind == "P":
-                tip = "Element name"
+                tip = "Element name" if n == 1 else \
+                    "Name of {} elements \u00b7 names must differ: use a pattern such as A-[Name]-01 or Door [##]".format(n)
             else:
                 tip = "Instance parameter \u00b7 {} element{}".format(n, "" if n == 1 else "s")
             if slot.editor == "ro":
                 tip += " \u00b7 read-only"
             elif len(distinct) > 1:
                 tip += " \u00b7 values differ"
+            if slot.editor == "text" and n > 1:
+                tip += "\nPatterns: [Name] [Value] [Mark] [#] [##=1] [Name|upper] [Name/old/new]"
             r["Tip"] = "{}\n{}".format(slot.name, tip)
             t.Rows.Add(r)
         t.DefaultView.Sort = "Order ASC, Group ASC, Name ASC"
@@ -226,6 +232,11 @@ class ParamModel(object):
 # --------------------------------------------------------------------------- choices for 'id' editors
 
 def _label(el):
+    if isinstance(el, DB.GraphicsStyle):
+        try:
+            return el.GraphicsStyleCategory.Name
+        except Exception:
+            pass
     if isinstance(el, DB.ElementType):
         fam = ""
         try:
@@ -249,8 +260,436 @@ def _dedupe(pairs):
     return out
 
 
+# --------------------------------------------------------------------------- choices for 'id' editors
+# Rover works out what an element-reference parameter can hold without needing a value already set:
+#   1. rules for Revit's own parameters (templates, levels, patterns, arrowheads, profiles, fittings...)
+#   2. the parameter's declared type (family/shared parameters: Material, Image, <Category> family type)
+#   3. a value set on one of the selected elements (same class, same category / family)
+#   4. a value set on any other element of the same kind in the model
+#   5. the parameter name (level / phase / material)
+
+NONE_LABEL = "<None>"
+BIC = DB.BuiltInCategory
+
+
+def _bic(name):
+    return getattr(BIC, name, None)
+
+
+def _cls(name):
+    """A Revit API class by name, wherever it lives (DB, DB.Plumbing, DB.Electrical...)."""
+    for ns in (DB, getattr(DB, "Plumbing", None), getattr(DB, "Mechanical", None),
+               getattr(DB, "Electrical", None), getattr(DB, "Analysis", None), getattr(DB, "Architecture", None),
+               getattr(DB, "Structure", None)):
+        if ns is not None:
+            c = getattr(ns, name, None)
+            if c is not None:
+                return c
+    return None
+
+
+def _bip_name(p):
+    try:
+        return str(p.Definition.BuiltInParameter)
+    except Exception:
+        return ""
+
+
+def _of_class(doc, cls):
+    if cls is None:
+        return []
+    try:
+        return list(DB.FilteredElementCollector(doc).OfClass(cls))
+    except Exception:
+        return []
+
+
+def _types_of(doc, *bic_names):
+    out = []
+    for n in bic_names:
+        b = _bic(n)
+        if b is None:
+            continue
+        try:
+            out.extend(DB.FilteredElementCollector(doc).OfCategory(b).WhereElementIsElementType())
+        except Exception:
+            pass
+    return out
+
+
+def _instances_of(doc, *bic_names):
+    out = []
+    for n in bic_names:
+        b = _bic(n)
+        if b is None:
+            continue
+        try:
+            out.extend(DB.FilteredElementCollector(doc).OfCategory(b).WhereElementIsNotElementType())
+        except Exception:
+            pass
+    return out
+
+
+def _views_of(doc, el):
+    """The View an element stands for: itself, or a Viewport's view."""
+    if isinstance(el, DB.View):
+        return el
+    vp = _cls("Viewport")
+    if vp is not None and isinstance(el, vp):
+        try:
+            return doc.GetElement(el.ViewId)
+        except Exception:
+            return None
+    return None
+
+
+def _view_type_label(vt):
+    """FloorPlan -> Floor Plan."""
+    t = str(vt)
+    out = ""
+    for i, ch in enumerate(t):
+        if i and ch.isupper() and not t[i - 1].isupper():
+            out += " "
+        out += ch
+    return out.replace("Three D", "3D")
+
+
+def _template_pairs(doc, els, for_new=False):
+    """[(label, id)]: templates of the selection's view type first, then the rest marked with their type."""
+    temps = [v for v in _of_class(doc, DB.View) if v.IsTemplate]
+    types = set()
+    for e in els:
+        v = None
+        if for_new:
+            try:
+                tid = e.Id
+                v = next((x for x in _of_class(doc, DB.View) if not x.IsTemplate and x.GetTypeId() == tid), None)
+            except Exception:
+                v = None
+        else:
+            v = _views_of(doc, e)
+        if v is not None:
+            types.add(str(v.ViewType))
+    match, other = [], []
+    for t in temps:
+        if not types or str(t.ViewType) in types:
+            match.append((_label(t), t.Id))
+        else:
+            other.append(("{}  ({})".format(_label(t), _view_type_label(t.ViewType)), t.Id))
+    key = lambda kv: kv[0].lower()
+    if types == set(["Schedule"]):
+        other = []                       # schedules only take schedule templates
+    return _dedupe(sorted(match, key=key)) + _dedupe(sorted(other, key=key))
+
+
+def _line_style_pairs(doc, els):
+    """[(label, id)] line styles every selected curve accepts, as Revit's Line Style list shows them."""
+    common = None
+    for e in els:
+        try:
+            ids = set(rx_data.eid_int(i) for i in e.GetLineStyleIds())
+        except Exception:
+            return None
+        common = ids if common is None else (common & ids)
+    out = []
+    for n in common or []:
+        g = doc.GetElement(rx_data.make_eid(n))
+        if g is not None:
+            out.append((_label(g), g.Id))
+    return _dedupe(sorted(out, key=lambda kv: kv[0].lower()))
+
+
+def _line_styles(doc):
+    """Projection line styles: the Lines category and its subcategories."""
+    try:
+        lines_id = DB.Category.GetCategory(doc, BIC.OST_Lines).Id
+    except Exception:
+        return []
+    out = []
+    for g in _of_class(doc, DB.GraphicsStyle):
+        try:
+            if g.GraphicsStyleType != DB.GraphicsStyleType.Projection:
+                continue
+            c = g.GraphicsStyleCategory
+            if c is not None and (c.Id == lines_id or (c.Parent is not None and c.Parent.Id == lines_id)):
+                out.append(g)
+        except Exception:
+            pass
+    return out
+
+
+def _arrowheads(doc):
+    out = []
+    for t in _of_class(doc, DB.ElementType):
+        try:
+            if t.get_Parameter(BIP.ARROW_TYPE) is not None:
+                out.append(t)
+        except Exception:
+            pass
+    return out
+
+
+def _fill_patterns(doc, drafting_only=False):
+    out = []
+    for f in _of_class(doc, DB.FillPatternElement):
+        try:
+            if drafting_only and f.GetFillPattern().Target != DB.FillPatternTarget.Drafting:
+                continue
+        except Exception:
+            pass
+        out.append(f)
+    return out
+
+
+def _subcategories(doc, bic_name):
+    """(label, id) pairs - subcategories are not elements."""
+    try:
+        cat = DB.Category.GetCategory(doc, _bic(bic_name))
+        return [(c.Name, c.Id) for c in cat.SubCategories]
+    except Exception:
+        return []
+
+
+def _fitting_cats(els):
+    """Which fitting category a curve type's default fittings come from."""
+    names = set()
+    for e in els:
+        n = e.GetType().Name
+        if "Conduit" in n:
+            names.add("OST_ConduitFitting")
+        elif "CableTray" in n:
+            names.add("OST_CableTrayFitting")
+        elif "Duct" in n:
+            names.add("OST_DuctFitting")
+        elif "Pipe" in n:
+            names.add("OST_PipeFitting")
+    return sorted(names) or ["OST_PipeFitting", "OST_DuctFitting", "OST_ConduitFitting", "OST_CableTrayFitting"]
+
+
+LEVEL_BIPS = set("""WALL_BASE_CONSTRAINT WALL_HEIGHT_TYPE DPART_BASE_LEVEL FAMILY_BASE_LEVEL_PARAM
+FAMILY_TOP_LEVEL_PARAM ROOF_BASE_LEVEL_PARAM ROOF_UPTO_LEVEL_PARAM SCHEDULE_BASE_LEVEL_PARAM
+SCHEDULE_TOP_LEVEL_PARAM STAIRS_BASE_LEVEL_PARAM STAIRS_TOP_LEVEL_PARAM STAIRS_RAILING_BASE_LEVEL_PARAM
+STAIRS_MULTISTORY_TOP_LEVEL_PARAM FAMILY_LEVEL_PARAM LEVEL_PARAM WALL_SWEEP_LEVEL_PARAM
+RBS_ENERGY_ANALYSIS_GROUND_PLANE_PARAM VIEW_UNDERLAY_BOTTOM_ID VIEW_UNDERLAY_TOP_ID GROUP_LEVEL
+INSTANCE_SCHEDULE_ONLY_LEVEL_PARAM LEVEL_UP_TO_LEVEL ROOM_UPPER_LEVEL ROOM_LEVEL_ID
+INSTANCE_REFERENCE_LEVEL_PARAM STRUCTURAL_BASE_LEVEL STRUCTURAL_TOP_LEVEL""".split())
+
+PHASE_BIPS = set("PHASE_CREATED PHASE_DEMOLISHED VIEW_PHASE RBS_ENERGY_ANALYSIS_PROJECT_PHASE_PARAM".split())
+
+LINE_PATTERN_BIPS = set("""LINE_PATTERN DIM_STYLE_CENTERLINE_PATTERN GRID_CENTER_SEGMENT_PATTERN
+GRID_END_SEGMENT_PATTERN""".split())
+
+ARROW_BIPS = set("""LEADER_ARROWHEAD SPOT_ELEV_LEADER_ARROWHEAD DIM_LEADER_ARROWHEAD DIM_STYLE_LEADER_TICK_MARK
+DIM_STYLE_INTERIOR_TICK_MARK DIM_STYLE_CENTERLINE_TICK_MARK WITNS_LINE_TICK_MARK ARROWHEAD_TYPE""".split())
+
+PROFILE_BIPS = set("""MULLION_PROFILE REVEAL_PROFILE_PARAM WALL_SWEEP_PROFILE_PARAM SLAB_EDGE_PROFILE_PARAM
+FASCIA_PROFILE_PARAM GUTTER_PROFILE_PARAM CONTINUOUSRAIL_PROFILE_TYPE_PARAM STAIRS_TRISERTYPE_RISER_PROFILE
+STAIRS_TRISERTYPE_TREAD_PROFILE STAIRS_TRISERTYPE_NOSING_PROFILE STAIRS_ATTR_TREAD_FRONT_PROFILE
+STAIRS_SUPPORTTYPE_SECTION_PROFILE""".split())
+
+MATERIAL_BIPS = set("""MATERIAL_ID_PARAM STRUCTURAL_MATERIAL_PARAM RBS_PIPE_MATERIAL_PARAM POCHE_MAT_ID
+CONTINUOUSRAIL_MATERIALS_PARAM STAIRS_SUPPORTTYPE_MATERIAL STAIRS_ATTR_BODY_MATERIAL STAIRS_ATTR_RISER_MATERIAL
+STAIRS_ATTR_TREAD_MATERIAL STAIRS_ATTR_STRINGER_MATERIAL STAIRS_LANDINGTYPE_LANDING_MATERIAL
+STAIRS_RUNTYPE_RUN_MATERIAL STAIRS_TRISERTYPE_RISER_MATERIAL STAIRS_TRISERTYPE_TREAD_MATERIAL RAMP_ATTR_MATERIAL
+CONCEPTUAL_CONSTRUCTION_MATERIAL""".split())
+
+MULLION_BIPS = set("""AUTO_MULLION_BORDER1_GRID1 AUTO_MULLION_BORDER1_GRID2 AUTO_MULLION_BORDER1_HORIZ
+AUTO_MULLION_BORDER1_VERT AUTO_MULLION_BORDER2_GRID1 AUTO_MULLION_BORDER2_GRID2 AUTO_MULLION_BORDER2_HORIZ
+AUTO_MULLION_BORDER2_VERT AUTO_MULLION_INTERIOR_GRID1 AUTO_MULLION_INTERIOR_GRID2 AUTO_MULLION_INTERIOR_HORIZ
+AUTO_MULLION_INTERIOR_VERT""".split())
+
+FITTING_BIPS = set("""RBS_CURVETYPE_DEFAULT_BEND_PARAM RBS_CURVETYPE_DEFAULT_CROSS_PARAM RBS_CURVETYPE_DEFAULT_TEE_PARAM
+RBS_CURVETYPE_DEFAULT_TAKEOFF_PARAM RBS_CURVETYPE_DEFAULT_TRANSITION_PARAM RBS_CURVETYPE_DEFAULT_UNION_PARAM
+RBS_CURVETYPE_DEFAULT_HORIZONTAL_BEND_PARAM RBS_CURVETYPE_DEFAULT_ELBOWUP_PARAM RBS_CURVETYPE_DEFAULT_ELBOWDOWN_PARAM
+RBS_CURVETYPE_MULTISHAPE_TRANSITION_PARAM RBS_CURVETYPE_MULTISHAPE_TRANSITION_OVALROUND_PARAM
+RBS_CURVETYPE_MULTISHAPE_TRANSITION_RECTOVAL_PARAM""".split())
+
+IMAGE_BIPS = set("ALL_MODEL_IMAGE ALL_MODEL_TYPE_IMAGE".split())
+
+
+def _by_rule(doc, bip, els):
+    """Candidates for a Revit built-in parameter, or None when there is no rule for it."""
+    if bip in LEVEL_BIPS:
+        return _of_class(doc, DB.Level)
+    if bip in PHASE_BIPS:
+        return list(doc.Phases)
+    if bip == "VIEW_PHASE_FILTER":
+        return _of_class(doc, _cls("PhaseFilter"))
+    if bip in MATERIAL_BIPS:
+        return _of_class(doc, DB.Material)
+    if bip in LINE_PATTERN_BIPS:
+        return _of_class(doc, DB.LinePatternElement)
+    if bip == "COARSE_SCALE_FILL_PATTERN_ID_PARAM":
+        return _fill_patterns(doc, drafting_only=True)
+    if bip in ("FOREGROUND_ANY_PATTERN_ID_PARAM", "BACKGROUND_DRAFT_PATTERN_ID_PARAM",
+               "FOREGROUND_DRAFT_PATTERN_ID_PARAM", "BACKGROUND_ANY_PATTERN_ID_PARAM"):
+        return _fill_patterns(doc)
+    if bip in ("BUILDING_CURVE_GSTYLE", "BUILDING_CURVE_GSTYLE_PLUS_INVISIBLE"):
+        return _line_styles(doc)
+    if bip in ARROW_BIPS:
+        return _arrowheads(doc)
+    if bip in PROFILE_BIPS:
+        return _types_of(doc, "OST_ProfileFamilies")
+    if bip in MULLION_BIPS:
+        return _types_of(doc, "OST_CurtainWallMullions")
+    if bip in ("AUTO_PANEL", "AUTO_PANEL_WALL"):
+        return _types_of(doc, "OST_CurtainWallPanels")
+    if bip in ("CONTINUOUSRAIL_BEGINNING_TERMINATION_TYPE_PARAM", "CONTINUOUSRAIL_END_TERMINATION_TYPE_PARAM"):
+        return _types_of(doc, "OST_RailingTermination")
+    if bip == "HANDRAIL_SUPPORTS_TYPE_PARAM":
+        return _types_of(doc, "OST_RailingSupport")
+    if bip in FITTING_BIPS:
+        return _types_of(doc, *_fitting_cats(els))
+    if bip in IMAGE_BIPS:
+        return _of_class(doc, _cls("ImageType"))
+    if bip in ("VIEWER_VOLUME_OF_INTEREST_CROP", "DATUM_VOLUME_OF_INTEREST"):
+        return _instances_of(doc, "OST_VolumeOfInterest")
+    if bip == "SHEET_GUIDE_GRID":
+        return _instances_of(doc, "OST_GuideGrid")
+    if bip == "VIEW_ANALYSIS_DISPLAY_STYLE":
+        return _of_class(doc, _cls("AnalysisDisplayStyle"))
+    if bip == "VIEWER_OPTION_VISIBILITY":
+        return _of_class(doc, _cls("DesignOption"))
+    if bip == "DIM_LABEL":
+        return _of_class(doc, _cls("GlobalParameter"))
+    if bip == "DIM_STYLE_CENTERLINE_SYMBOL":
+        return _types_of(doc, "OST_GenericAnnotation")
+    if bip in ("SECTION_ATTR_HEAD_TAG", "SECTION_ATTR_TAIL_TAG"):
+        return _types_of(doc, "OST_SectionHeads")
+    if bip == "ELEV_SYMBOL_ID":
+        return _types_of(doc, "OST_ElevationMarks")
+    if bip == "GRID_HEAD_TAG":
+        return _types_of(doc, "OST_GridHeads")
+    if bip == "LEVEL_HEAD_TAG":
+        return _types_of(doc, "OST_LevelHeads")
+    if bip == "SPOT_ELEV_SYMBOL":
+        return _types_of(doc, "OST_SpotElevSymbols")
+    if bip == "VIEWPORT_ATTR_LABEL_TAG":
+        return _types_of(doc, "OST_ViewportLabel")
+    if bip == "RBS_PIPE_CLASS_PARAM":
+        return _of_class(doc, _cls("PipeScheduleType"))
+    if bip == "RBS_PIPING_SYSTEM_TYPE_PARAM":
+        return _of_class(doc, _cls("PipingSystemType"))
+    if bip == "RBS_DUCT_SYSTEM_TYPE_PARAM":
+        return _of_class(doc, _cls("MechanicalSystemType"))
+    if bip == "RBS_PIPE_FLUID_TYPE_PARAM":
+        return _types_of(doc, "OST_PipingFluids") or _of_class(doc, _cls("FluidType"))
+    if bip == "RBS_DISTRIBUTIONSYS_VLG_PARAM":
+        return _of_class(doc, _cls("VoltageType"))
+    if bip == "REVISION_CLOUD_REVISION":
+        return _of_class(doc, _cls("Revision"))
+    if bip == "STAIRS_TEXT_TYPE":
+        return _of_class(doc, _cls("TextNoteType"))
+    return None
+
+
+def _by_datatype(doc, p):
+    """Candidates from a family/shared parameter's declared type, or None."""
+    try:
+        dt = p.Definition.GetDataType()
+    except Exception:
+        return None
+    if dt is None or not dt.TypeId:
+        return None
+    ref = DB.SpecTypeId.Reference
+    try:
+        if dt == ref.Material:
+            return _of_class(doc, DB.Material)
+        if dt == ref.Image:
+            return _of_class(doc, _cls("ImageType"))
+        if dt == ref.LoadClassification:
+            return _of_class(doc, _cls("ElectricalLoadClassification"))
+    except Exception:
+        pass
+    try:
+        if DB.Category.IsBuiltInCategory(dt):
+            bic = DB.Category.GetBuiltInCategory(dt)
+            return list(DB.FilteredElementCollector(doc).OfCategory(bic).WhereElementIsElementType())
+    except Exception:
+        pass
+    return None
+
+
+def _like(doc, ref):
+    """Elements of the same kind as `ref`: same class, same category, same family (types), same template-ness."""
+    cat_id = ref.Category.Id if ref.Category is not None else None
+    try:
+        col = list(DB.FilteredElementCollector(doc).OfClass(ref.GetType()))
+    except Exception:
+        col = list(DB.FilteredElementCollector(doc).OfCategoryId(cat_id)) if cat_id is not None else [ref]
+    out = []
+    fam = None
+    if isinstance(ref, DB.ElementType) and cat_id is None:
+        try:
+            fam = ref.FamilyName
+        except Exception:
+            fam = None
+    for c in col:
+        if cat_id is not None and (c.Category is None or c.Category.Id != cat_id):
+            continue
+        if isinstance(ref, DB.View) and c.IsTemplate != ref.IsTemplate:
+            continue
+        if fam:
+            try:
+                if c.FamilyName != fam:
+                    continue
+            except Exception:
+                continue
+        out.append(c)
+    return out
+
+
+def _sample_ref(doc, slot, els, limit=4000):
+    """A value of this parameter set on any element of the same class as the selection."""
+    seen = 0
+    for cls in set(type(e) for e in els):
+        if cls is DB.PropertySetElement:      # asset parameters are not safe to scan
+            continue
+        try:
+            col = DB.FilteredElementCollector(doc).OfClass(cls)
+        except Exception:
+            continue
+        for e in col:
+            seen += 1
+            if seen > limit:
+                return None
+            p = slot.find(e)
+            if p is None or not p.HasValue:
+                continue
+            v = p.AsElementId()
+            if rx_data.is_valid(v) and rx_data.eid_int(v) > 0:
+                r = doc.GetElement(v)
+                if r is not None:
+                    return r
+    return None
+
+
+def _ref_on(doc, slot, els):
+    for e in els:
+        p = slot.find(e)
+        if p is not None and p.HasValue:
+            v = p.AsElementId()
+            if rx_data.is_valid(v) and rx_data.eid_int(v) > 0:
+                r = doc.GetElement(v)
+                if r is not None:
+                    return r
+    return None
+
+
 def choices(doc, slot):
-    """[(label, value)] the slot can be set to; value is an ElementId (or workset int)."""
+    """[(label, value)] the slot can be set to; value is an ElementId (or workset int). Cached on the slot."""
+    cached = getattr(slot, "_choices", None)
+    if cached is not None:
+        return cached
+    try:
+        out = _choices(doc, slot)
+    except Exception:
+        out = []                         # never let a drop-down break the inspector
+    slot._choices = out
+    return out
+
+
+def _choices(doc, slot):
     els = [doc.GetElement(i) for i in slot.targets]
     els = [e for e in els if e is not None]
     if not els:
@@ -275,34 +714,43 @@ def choices(doc, slot):
                 out.append((_label(te), te.Id))
         return _dedupe(sorted(out, key=lambda kv: kv[0].lower()))
 
-    ref = None
-    for e in els:
-        p = slot.find(e)
-        if p is not None and p.HasValue:
-            v = p.AsElementId()
-            if rx_data.is_valid(v) and rx_data.eid_int(v) > 0:
-                ref = doc.GetElement(v)
-                if ref is not None:
-                    break
-    candidates = []
-    if ref is not None:
-        cat_id = ref.Category.Id if ref.Category is not None else None
-        try:
-            col = DB.FilteredElementCollector(doc).OfClass(ref.GetType())
-            candidates = [c for c in col if cat_id is None or (c.Category is not None and c.Category.Id == cat_id)]
-        except Exception:
-            if cat_id is not None:
-                candidates = list(DB.FilteredElementCollector(doc).OfCategoryId(cat_id))
-    else:
-        low = slot.name.lower()
-        if "level" in low:
-            candidates = list(DB.FilteredElementCollector(doc).OfClass(DB.Level))
-        elif "phase" in low:
-            candidates = list(doc.Phases)
-        elif "material" in low:
-            candidates = list(DB.FilteredElementCollector(doc).OfClass(DB.Material))
-    out = sorted([(_label(c), c.Id) for c in candidates], key=lambda kv: kv[0].lower())
-    return [("<None>", DB.ElementId.InvalidElementId)] + _dedupe(out)
+    p0 = slot.find(els[0])
+    bip = _bip_name(p0) if p0 is not None else ""
+    pairs = None
+    ordered = False                      # pairs already sorted the way they should be shown
+    if bip == "CLINE_SUBCATEGORY":
+        pairs = _subcategories(doc, "OST_CLines")
+    elif bip in ("VIEW_TEMPLATE", "VIEW_TEMPLATE_FOR_SCHEDULE", "DEFAULT_VIEW_TEMPLATE"):
+        pairs, ordered = _template_pairs(doc, els, for_new=(bip == "DEFAULT_VIEW_TEMPLATE")), True
+    elif bip in ("BUILDING_CURVE_GSTYLE", "BUILDING_CURVE_GSTYLE_PLUS_INVISIBLE"):
+        pairs = _line_style_pairs(doc, els)
+    candidates = None
+    if pairs is None:
+        if bip and bip != "INVALID":
+            candidates = _by_rule(doc, bip, els)
+        if candidates is None and p0 is not None:
+            candidates = _by_datatype(doc, p0)
+        if candidates is None:
+            ref = _ref_on(doc, slot, els) or _sample_ref(doc, slot, els)
+            if ref is not None:
+                candidates = _like(doc, ref)
+        if candidates is None:
+            low = slot.name.lower()
+            if "level" in low:
+                candidates = _of_class(doc, DB.Level)
+            elif "phase" in low:
+                candidates = list(doc.Phases)
+            elif "material" in low:
+                candidates = _of_class(doc, DB.Material)
+            else:
+                candidates = []
+        # never offer an element as a value of itself
+        own = set(rx_data.eid_int(e.Id) for e in els)
+        pairs = [(_label(c), c.Id) for c in candidates if c is not None and rx_data.eid_int(c.Id) not in own]
+    if ordered:
+        return [(NONE_LABEL, DB.ElementId.InvalidElementId)] + pairs
+    out = sorted(pairs, key=lambda kv: kv[0].lower())
+    return [(NONE_LABEL, DB.ElementId.InvalidElementId)] + _dedupe(out)
 
 
 # --------------------------------------------------------------------------- choices for 'code' editors
@@ -492,8 +940,10 @@ def in_group(el):
         return False
 
 
-def apply(doc, slot, value):
-    """Write value to every target in one transaction. Returns (count written, [error messages])."""
+def apply(doc, slot, value, per=None):
+    """Write value to every target in one transaction. Returns (count written, [error messages]).
+
+    per: {element id int: value} - a separate value for each target (pattern edits)."""
     t = DB.Transaction(doc, "Rover: Set {}".format(slot.name))
     t.Start()
     ok, errors = 0, []
@@ -503,6 +953,10 @@ def apply(doc, slot, value):
             if el is None:
                 continue
             tag = "{} [{}]".format(rx_data.elem_name(el) or el.GetType().Name, rx_data.eid_int(eid))
+            if per is not None:
+                if rx_data.eid_int(eid) not in per:
+                    continue
+                value = per[rx_data.eid_int(eid)]
             try:
                 if slot.kind != "T" and in_group(el):
                     errors.append("{}: in a group - edit the group to change it".format(tag))

@@ -92,6 +92,7 @@ footer .sign { margin-left: auto; font-style: italic; }
     <li><a href="#warnings">Warnings tab</a></li>
     <li><a href="#database">Settings &amp; Database</a></li>
     <li><a href="#editing">Editing parameters</a></li>
+    <li><a href="#patterns">Patterns</a></li>
     <li><a href="#trees">Tree right-click menu</a></li>
     <li><a href="#keys">Mouse &amp; keyboard</a></li>
     <li><a href="#tips">Tips &amp; troubleshooting</a></li>
@@ -102,14 +103,15 @@ footer .sign { margin-left: auto; font-style: italic; }
 <main>
 <section id="start">
   <h2>Getting started</h2>
-  <p>Click <b>Rover tab &rsaquo; Browse &rsaquo; Rover</b>. The window opens beside Revit and stays open while you work (it is <em>modeless</em>). Clicking the button again brings the open window to the front.</p>
-  <p>Rover reads the active document when it opens. On a large model the first load of <b>Entire document</b> takes a few seconds; switching tabs afterwards reuses what was loaded. Press <b>Refresh</b> after making changes in Revit.</p>
+  <p>Click <b>Rover tab &rsaquo; Browse &rsaquo; Rover</b>. The window opens beside Revit and stays open while you work (it is <em>modeless</em>). Clicking the button again brings the open window to the front, restoring it if it was minimized. After a pyRevit reload, clicking it replaces an old Rover window with the new version.</p>
+  <p>Rover reads the active document when it opens. On a large model the first load of <b>Entire document</b> takes a while (around 40 seconds for a model of about 38,000 elements); a splash screen shows while it loads. Switching tabs afterwards reuses what was loaded. Press <b>Refresh</b> after making changes in Revit.</p>
   <p>The window follows Revit's dark or light UI theme (Revit 2024 and later), and switches when Revit does.</p>
 </section>
 
 <section id="window">
   <h2>The window</h2>
   <p>The title bar shows a line that changes with what you are doing. The <b>?</b> button beside minimize opens this help (or press <kbd>F1</kbd>).</p>
+  <p>The status bar along the bottom shows what Rover just did, with a <i>Crafted by</i> link on the left and the current theme on the right.</p>
   <p>Under the title bar are the five tabs, followed by toolbar buttons that act on Revit:</p>
   <table>
     <tr><th>Button</th><th>What it does</th></tr>
@@ -213,12 +215,46 @@ footer .sign { margin-left: auto; font-style: italic; }
   <p><span class="badge bi">I</span> marks an instance parameter, <span class="badge bt">T</span> a type parameter. Changing a type parameter changes <em>every</em> instance of that type &mdash; the tooltip says how many types are affected.</p>
   <h3>Many elements at once</h3>
   <p>Highlight up to 2,000 rows. Only parameters they all share are listed; differing values show <code>&lt;varies&gt;</code>. An edit is written to all of them in one step.</p>
+  <h3 id="patterns">Patterns: different values for each element</h3>
+  <p>Some values must differ from element to element &mdash; Name, View Name, Sheet Number, Mark. Type a <b>pattern</b> into a text value and Rover works out a value for each highlighted element. A preview lists the changes before anything is written, and the whole edit is one undo.</p>
+  <table>
+    <tr><th>Token</th><th>Becomes</th></tr>
+    <tr><td><code>[Name]</code></td><td>the element's current name</td></tr>
+    <tr><td><code>[Value]</code></td><td>this parameter's current value on the element</td></tr>
+    <tr><td><code>[Mark]</code>, <code>[Sheet Number]</code>, &hellip;</td><td>any parameter of the element (or its type), by name</td></tr>
+    <tr><td><code>[Id]</code> <code>[Family]</code> <code>[Type]</code> <code>[Category]</code></td><td>element id, family name, type name, category</td></tr>
+    <tr><td><code>[#]</code> <code>[##]</code> <code>[###]</code></td><td>a running number padded to that many digits: 1, 01, 001&hellip; in list order</td></tr>
+    <tr><td><code>[##=5]</code></td><td>a running number starting at 05</td></tr>
+    <tr><td><code>[Name|upper]</code></td><td>modifiers: <code>upper</code>, <code>lower</code>, <code>title</code>, <code>trim</code></td></tr>
+    <tr><td><code>[Name/old/new]</code></td><td>replace text inside the value</td></tr>
+    <tr><td><code>[[</code> <code>]]</code></td><td>a literal <code>[</code> or <code>]</code></td></tr>
+  </table>
+  <table>
+    <tr><th>Pattern</th><th>Current name</th><th>Result</th></tr>
+    <tr><td><code>A-[Name]-01</code></td><td>Door Heads</td><td>A-Door Heads-01</td></tr>
+    <tr><td><code>D[##] [Name|upper]</code></td><td>Door Heads, Door Jambs</td><td>D01 DOOR HEADS, D02 DOOR JAMBS</td></tr>
+    <tr><td><code>[Name/Typ/Typical]</code></td><td>Typ Wall Section</td><td>Typical Wall Section</td></tr>
+    <tr><td><code>[Sheet Number] - [Name]</code></td><td>Plan (on sheet A101)</td><td>A101 - Plan</td></tr>
+  </table>
+  <p>Running numbers follow the list's current sort order. With several elements highlighted, the Name row accepts only patterns; Rover refuses a pattern that would give two elements the same name.</p>
+
   <h3>Name and API properties</h3>
-  <p>The <b>Name</b> row renames types, views, levels, grids, materials, families, filters and similar elements. The <b>API members</b> tab can also set writable properties such as <code>Pinned</code> and enum settings.</p>
+  <p>The <b>Name</b> row renames types, views, levels, grids, materials, families, filters and similar elements &mdash; one at a time, or many at once with a <a href="#patterns">pattern</a>. The <b>API members</b> tab can also set writable properties such as <code>Pinned</code> and enum settings.</p>
   <div class="note">
     <b>Undo:</b> every edit is one Revit transaction named <em>Rover: Set &hellip;</em> &mdash; press <kbd>Ctrl</kbd>+<kbd>Z</kbd> in Revit to undo it.<br>
     <b>Groups:</b> elements inside model or detail groups are skipped with a message; Revit only allows those changes in Edit Group mode.
   </div>
+  <h3>What element drop-downs offer</h3>
+  <p>Element drop-downs list what the field can actually hold, even when every highlighted element is currently <code>&lt;None&gt;</code>:</p>
+  <ul>
+    <li><b>View Template</b> &mdash; templates of the selection's view type first, then all others marked with their type, e.g. <i>Architectural Plan (Floor Plan)</i>. Schedules list schedule templates only.</li>
+    <li><b>Line Style</b> &mdash; the styles Revit offers for that line.</li>
+    <li><b>Levels, phases, materials, fill and line patterns, arrowheads, profiles, mullion and panel types, scope boxes, family types</b> &mdash; all of that kind in the model.</li>
+    <li><b>Family and shared parameters</b> &mdash; by their declared type (Material, Image, a family type of a category).</li>
+    <li><b>Fittings</b> (Bend, Tee, Cross&hellip;) &mdash; only <code>&lt;None&gt;</code> if no fittings of that kind are loaded.</li>
+  </ul>
+  <p>Every list starts with <code>&lt;None&gt;</code>. Revit still checks each value when you apply it.</p>
+
   <h3>How coded drop-downs are filled</h3>
   <p>Revit has no API listing a coded parameter's names. The first time one is shown, Rover sets each code inside a transaction that is always rolled back and reads the name Revit displays, then caches the list. The model is never changed and no dialog appears.</p>
 </section>
@@ -248,6 +284,8 @@ footer .sign { margin-left: auto; font-style: italic; }
     <tr><td><kbd>Ctrl</kbd>/<kbd>Shift</kbd>+click rows</td><td>Highlight several rows for multi-editing</td></tr>
     <tr><td>Right-click a tree</td><td>Tree menu</td></tr>
     <tr><td><kbd>Enter</kbd> in Find value</td><td>Run the search</td></tr>
+    <tr><td>Type <code>[tokens]</code> in a text value</td><td><a href="#patterns">Pattern edit</a> &mdash; a different value per element, with a preview</td></tr>
+    <tr><td>Click <i>Aaron Rumple, AIA</i> in the status bar</td><td>Open the author's LinkedIn page</td></tr>
   </table>
 </section>
 
@@ -257,6 +295,11 @@ footer .sign { margin-left: auto; font-style: italic; }
     <li><b>The list looks out of date</b> &mdash; press Refresh. Rover doesn't track every change made in Revit.</li>
     <li><b>"Revit did not accept"</b> &mdash; the value isn't valid for that parameter, or a constraint (such as a top-constrained wall height) blocks it.</li>
     <li><b>A type edit changed more than expected</b> &mdash; it was a <span class="badge bt">T</span> parameter; undo with <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+    <li><b>"Names must differ"</b> &mdash; with several elements highlighted, Name only takes a <a href="#patterns">pattern</a> such as <code>A-[Name]-01</code> or <code>Door [##]</code>.</li>
+    <li><b>"Pattern gives the same name more than once"</b> &mdash; add <code>[#]</code> or <code>[Id]</code> so each result is unique.</li>
+    <li><b>"No parameter named &hellip;"</b> &mdash; a pattern token must match a parameter name exactly, as shown in the Parameters list.</li>
+    <li><b>A drop-down shows only &lt;None&gt;</b> &mdash; nothing of that kind is loaded in the model (fittings, analysis display styles&hellip;).</li>
+    <li><b>Clicking Rover does nothing</b> &mdash; the window may be behind Revit or on another monitor; the button now restores a minimized window.</li>
     <li><b>Find value is slow</b> &mdash; add a Category condition or narrow the scope.</li>
     <li><b>The ribbon icon didn't update</b> &mdash; Revit caches images per session; it updates after Revit restarts.</li>
   </ul>
@@ -269,12 +312,14 @@ footer .sign { margin-left: auto; font-style: italic; }
     <tr><td>Saved searches</td><td><code>%APPDATA%\pyRevit\Rover\searches.json</code></td></tr>
     <tr><td>Extension</td><td>Wherever <code>Rover.extension</code> is installed, e.g. <code>%APPDATA%\pyRevit\Extensions</code></td></tr>
     <tr><td>Title-bar lines</td><td><code>rx_quotes.py</code> &mdash; edit to change which line goes with which task</td></tr>
+    <tr><td>Splash screen</td><td><code>splash.png</code> beside <code>script.py</code> &mdash; replace it to change the splash; the splash takes the image's size</td></tr>
+    <tr><td>This help</td><td><code>help/Rover_Help.html</code></td></tr>
   </table>
   <p>Source, issues and updates: <a href="https://github.com/aaronrumple/PyPiPie-Rover">github.com/aaronrumple/PyPiPie-Rover</a></p>
 </section>
 
 <footer>
-  <span>&copy; 2026 <a href="https://www.linkedin.com/in/aaronrumple/">Aaron Rumple, AIA</a> &middot; Updated November 1, 2026</span>
+  <span>&copy; 2026 <a href="https://www.linkedin.com/in/aaronrumple/">Aaron Rumple, AIA</a> &middot; Updated November 2, 2026</span>
   <span>Licensed under the <a href="https://github.com/aaronrumple/PyPiPie-Rover/blob/main/LICENSE">GNU GPL v3.0</a></span>
   <span>Source: <a href="https://github.com/aaronrumple/PyPiPie-Rover">github.com/aaronrumple/PyPiPie-Rover</a></span>
   <span class="sign">&ldquo;Be seeing you.&rdquo;</span>

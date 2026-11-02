@@ -116,9 +116,11 @@ def pick(uiapp, done):
 
 # --------------------------------------------------------------------------- edits
 
-def apply_edit(uiapp, doc, slot, value, done):
-    """Write a parameter / Name edit (see rx_edit.apply) and report back to the window."""
-    ok, errors = rx_edit.apply(doc, slot, value)
+def apply_edit(uiapp, doc, slot, value, done, per=None):
+    """Write a parameter / Name edit (see rx_edit.apply) and report back to the window.
+
+    per: {element id int: value} for pattern edits."""
+    ok, errors = rx_edit.apply(doc, slot, value, per)
     done(slot, ok, errors)
 
 
