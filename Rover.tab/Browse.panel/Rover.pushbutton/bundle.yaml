@@ -7,6 +7,5 @@ tooltip:
     for one element or a whole selection, search by category, family,
     type or parameter value, and snoop settings and the database.
 author: Aaron Rumple
-help_url: "https://github.com/aaronrumple/PyPiPie-Rover"
 engine:
   persistent: true

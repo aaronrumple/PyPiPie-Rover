@@ -552,7 +552,7 @@ class RoverWindow(forms.WPFWindow):
         args.Handled = True
 
     def show_help(self):
-        path = os.path.join(HERE, "help", "Rover_Help.html")
+        path = os.path.join(HERE, "Rover_help.html")
         try:
             os.startfile(path)
         except Exception as ex:

@@ -36,7 +36,7 @@ Rover is a [pyRevit](https://github.com/pyrevitlabs/pyRevit) extension for Autod
 - **Filter box on every pane**, cleared with × or Esc.
 - **Tree right-click menu:** Expand All, Collapse All, Isolate, Show All, Isolate Selected in View, Show All in View.
 - **CSV export** of any list.
-- **Help:** press **F1** or click **?** in the title bar to open the full HTML guide (`help/Rover_Help.html`).
+- **Help:** press **F1** or click **?** in the title bar, or press **F1** while hovering the ribbon button, to open the full HTML guide (`Rover_help.html`).
 
 ## Install
 
@@ -67,7 +67,7 @@ Rover.tab/Browse.panel/Rover.pushbutton/
   script.py, bundle.yaml           button entry point (persistent engine)
   RoverWindow.xaml                 layout and styles (all colors are DynamicResources)
   Themes/Dark.xaml, Light.xaml     theme brushes
-  help/Rover_Help.html             user guide (F1)
+  Rover_help.html                  user guide (F1 in Rover and on the ribbon button)
   rx_window.py                     window logic: tabs, trees, filters, inspector, editing
   rx_data.py                       element/type index, parameters, reflection, relations
   rx_edit.py                       editable parameter model, drop-down choices, writes
