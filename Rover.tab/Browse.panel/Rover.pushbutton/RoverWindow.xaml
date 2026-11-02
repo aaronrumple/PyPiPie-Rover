@@ -1222,6 +1222,23 @@
         <Border Grid.Row="3" Background="{DynamicResource rx.Header}" BorderBrush="{DynamicResource rx.Border}" BorderThickness="0,1,0,0" Padding="10,4">
             <DockPanel>
                 <TextBlock x:Name="ThemeLabel" DockPanel.Dock="Right" Foreground="{DynamicResource rx.Muted}"/>
+                <TextBlock DockPanel.Dock="Left" Foreground="{DynamicResource rx.Muted}" Margin="0,0,10,0">
+                    <Run Text="Crafted by: "/><Hyperlink x:Name="CreditLink" NavigateUri="https://www.linkedin.com/in/aaronrumple/"
+                               ToolTip="Aaron Rumple on LinkedIn">
+                        <Hyperlink.Style>
+                            <Style TargetType="Hyperlink">
+                                <Setter Property="Foreground" Value="{DynamicResource rx.Text}"/>
+                                <Setter Property="TextDecorations" Value="{x:Null}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource rx.Accent}"/>
+                                        <Setter Property="TextDecorations" Value="Underline"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Hyperlink.Style>Aaron Rumple, AIA</Hyperlink>
+                </TextBlock>
+                <Border DockPanel.Dock="Left" Width="1" Margin="0,2,10,2" Background="{DynamicResource rx.Border}"/>
                 <TextBlock x:Name="Status" Foreground="{DynamicResource rx.Muted}" TextTrimming="CharacterEllipsis"
                            Text="Edit a value and press Enter. Double-click a row to open a view showing it."/>
             </DockPanel>

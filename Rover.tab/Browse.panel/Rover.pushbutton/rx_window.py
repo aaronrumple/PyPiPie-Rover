@@ -542,6 +542,14 @@ class RoverWindow(forms.WPFWindow):
                 box.Focus()
                 args.Handled = True
 
+    def _open_link(self, sender, args):
+        try:
+            from System.Diagnostics import Process
+            Process.Start(args.Uri.AbsoluteUri)
+        except Exception:
+            pass
+        args.Handled = True
+
     def show_help(self):
         path = os.path.join(HERE, "help", "Rover_Help.html")
         try:
@@ -641,6 +649,7 @@ class RoverWindow(forms.WPFWindow):
         self.DbFilter.TextChanged += lambda s, a: self._db_filter()
 
         self.CapHelp.Click += lambda s, a: self.show_help()
+        self.CreditLink.RequestNavigate += self._open_link
         self.CapMin.Click += lambda s, a: self._minimize()
         self.CapMax.Click += lambda s, a: self._toggle_max()
         self.CapClose.Click += lambda s, a: self.Close()

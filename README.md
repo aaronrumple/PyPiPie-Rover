@@ -4,6 +4,8 @@
 
 *"Where am I?" "In the Village."*
 
+Crafted by: [Aaron Rumple, AIA](https://www.linkedin.com/in/aaronrumple/)
+
 Rover is a [pyRevit](https://github.com/pyrevitlabs/pyRevit) extension for Autodesk Revit: one modeless window to browse, search, inspect and edit the model. Think Revit Lookup crossed with Ideate Explorer, written in IronPython. Part of the PyPiPie tools.
 
 - **Follows Revit's theme:** dark or light, and switches when Revit does.
@@ -87,5 +89,7 @@ Saved searches are stored in `%APPDATA%\pyRevit\Rover\searches.json`.
 ## License
 
 GPL-3.0. See [LICENSE](LICENSE).
+
+© 2026 [Aaron Rumple, AIA](https://www.linkedin.com/in/aaronrumple/)
 
 *Be seeing you.*
